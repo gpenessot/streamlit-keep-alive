@@ -4,15 +4,23 @@ on:
   schedule:
     - cron: '0 */8 * * *'   # Every 8 hours: Community Cloud apps sleep after 12 hours without traffic
   workflow_dispatch:
-  pull_request:             # Builds and runs the action on every PR before release
+  pull_request:             # Checks that the action still builds before a release
 
 jobs:
   keep-alive:
     runs-on: ubuntu-latest
+    env:
+      APP_URL: ${{ secrets.APP_URL }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      # Runs the action from this repository: a live test of every change
-      - uses: ./
+      - name: Build the action image
+        run: docker build -t streamlit-keep-alive .
+
+      # Runs the action from this repository against the apps listed in the APP_URL secret.
+      # Skipped when the secret is not set, so the workflow never fails for that reason.
+      - name: Keep apps awake
+        if: env.APP_URL != ''
+        uses: ./
         with:
-          app-urls: ${{ secrets.APP_URL }}
+          app-urls: ${{ env.APP_URL }}
