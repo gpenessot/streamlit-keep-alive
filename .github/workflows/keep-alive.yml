@@ -4,13 +4,17 @@ on:
   schedule:
     - cron: '0 */8 * * *'   # Every 8 hours: Community Cloud apps sleep after 12 hours without traffic
   workflow_dispatch:
+    inputs:
+      app-urls:
+        description: 'URLs to probe for this run only (defaults to the APP_URL secret)'
+        required: false
   pull_request:             # Checks that the action still builds before a release
 
 jobs:
   keep-alive:
     runs-on: ubuntu-latest
     env:
-      APP_URL: ${{ secrets.APP_URL }}
+      APP_URL: ${{ inputs.app-urls || secrets.APP_URL }}
     steps:
       - uses: actions/checkout@v5
 
