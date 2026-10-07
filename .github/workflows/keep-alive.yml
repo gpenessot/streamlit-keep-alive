@@ -2,19 +2,29 @@ name: Keep Streamlit App Alive
 
 on:
   schedule:
-    - cron: '0 7 * * *'   # Every day at 7:00 UTC (9:00 Paris)
-  workflow_dispatch:        # Allow manual trigger
+    - cron: '0 */8 * * *'   # Every 8 hours: Community Cloud apps sleep after 12 hours without traffic
+  workflow_dispatch:
+    inputs:
+      app-urls:
+        description: 'URLs to probe for this run only (defaults to the APP_URL secret)'
+        required: false
+  pull_request:             # Checks that the action still builds before a release
 
 jobs:
-  probe:
+  keep-alive:
     runs-on: ubuntu-latest
-
+    env:
+      APP_URL: ${{ inputs.app-urls || secrets.APP_URL }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - name: Build probe image
-        run: docker build -t streamlit-probe .
+      - name: Build the action image
+        run: docker build -t streamlit-keep-alive .
 
-      - name: Run probe
-        run: docker run --rm streamlit-probe "${{ secrets.APP_URL }}"
+      # Runs the action from this repository against the apps listed in the APP_URL secret.
+      # Skipped when the secret is not set, so the workflow never fails for that reason.
+      - name: Keep apps awake
+        if: env.APP_URL != ''
+        uses: ./
+        with:
+          app-urls: ${{ env.APP_URL }}

@@ -1,7 +1,7 @@
 {
   "name": "streamlit-keep-alive",
-  "version": "1.0.0",
-  "description": "Keep Streamlit Cloud apps alive by auto-reactivating dormant apps via GitHub Actions + Puppeteer",
+  "version": "2.0.0",
+  "description": "GitHub Action that wakes up sleeping Streamlit Community Cloud apps and keeps them awake",
   "main": "probe.js",
   "scripts": {
     "probe": "node probe.js"

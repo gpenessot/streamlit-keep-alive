@@ -1,0 +1,23 @@
+name: 'Streamlit Keep Alive'
+description: 'Wake up sleeping Streamlit Community Cloud apps and keep them awake on a schedule.'
+author: 'Gaël Penessot'
+
+branding:
+  icon: 'sunrise'
+  color: 'red'
+
+inputs:
+  app-urls:
+    description: 'One or more Streamlit app URLs, one per line or comma separated.'
+    required: true
+  timeout:
+    description: 'Timeout in seconds for loading an app, and again for waking it up.'
+    required: false
+    default: '60'
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.app-urls }}
+    - ${{ inputs.timeout }}
